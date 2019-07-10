@@ -1,0 +1,23 @@
+{
+  "name": "discordBot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "erosionBot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "ethereumjs-tx": "^2.0.0",
+    "ethereumjs-util": "^6.1.0",
+    "etherscan-api": "^10.0.0",
+    "moment": "^2.24.0",
+    "text-cleaner": "^0.3.0",
+    "truffle-hdwallet-provider": "^1.0.13",
+    "twitter": "^1.7.1",
+    "web3": "^1.0.0-beta.55",
+    "web3-utils": "^1.0.0-beta.55"
+  }
+}
