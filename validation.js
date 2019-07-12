@@ -8,7 +8,10 @@ const textCleaner = require("text-cleaner");
 const eutil = require("ethereumjs-util");
 const Twitter = require("twitter");
 
-const etherscan = require("etherscan-api").init(etherscan_key);
+const etherscan = require("etherscan-api").init(
+  etherscan_key,
+  (timeout = 300000)
+);
 const twitter = new Twitter(twitter_keys);
 
 // gets a discord message object, returns an object:
@@ -74,7 +77,7 @@ async function verifyTwitter(currentPart) {
   }
 
   // collect parameters
-  const statusId = path.pop();
+  const statusId = path.pop().split("?")[0];
 
   // check status first
   const twitterStatus = await twitter
@@ -127,6 +130,18 @@ async function verifyTwitter(currentPart) {
 // returns an address or throw an error
 async function verifyEth(currentPart) {
   const txList = await etherscan.account.txlist(currentPart).catch(err => {
+    if (err == "NOTOK") {
+      return;
+    }
+    console.log(err);
+    throw new Error(
+      "Something went wrong when fetching your ethereum history. Please wait and try again."
+    );
+  });
+  const erc20txList = await etherscan.account.txlist(currentPart).catch(err => {
+    if (err == "NOTOK") {
+      return;
+    }
     console.log(err);
     throw new Error(
       "Something went wrong when fetching your ethereum history. Please wait and try again."
@@ -134,8 +149,18 @@ async function verifyEth(currentPart) {
   });
 
   // if there's no transaction list, return an error
-  if (!txList) {
+  if (!txList && !erc20txList) {
     throw new Error("No transactions found on your ethereum address.");
+  }
+
+  // if there's no transaction list, return an error
+  const txTimeStandard = new Date() - txList.result[0].timeStamp * 1000;
+  const txTimeErc20 = new Date() - erc20txList.result[0].timeStamp * 1000;
+
+  if (txTimeStandard <= 2592000000 && txTimeErc20 <= 2592000000) {
+    throw new Error(
+      "No transaction dated 30 days or older found on this address. ERC712 transactions don't count. Please provide a different address."
+    );
   }
 
   // return the address

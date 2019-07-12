@@ -16,26 +16,21 @@ const bot = new Discord.Client();
 
 bot.on("message", message => {
   // check if pinged
-  if (!message.mentions.users.get(bot.user.id)) {
+  if (message.author.id == bot.user.id) {
     return;
   }
 
   // check if it's in the right channel
-  if (message.channel.name != "spacedrop-verification") {
+  if (message.channel.type != "dm") {
     return;
   }
 
   // check if person already claimed
   let claimCode = storage.findClaimCode(message.author.id);
   if (claimCode) {
-    return message
-      .reply(resendCode)
-      .then(result => {
-        return message.author.send(claimCode);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    return message.author.send("**Claim code:** " + claimCode).catch(err => {
+      console.log(err);
+    });
   }
 
   // check if person has a profile with us, if not make it
@@ -88,11 +83,7 @@ bot.on("message", message => {
       if (isReady) {
         GenerateClaimCode(message.author.id)
           .then(result => {
-            message.author.send(claimInstr + result).then(msg => {
-              message.reply(
-                "Congratulations, I sent you a private message with your code to redeem 500 free EROS!"
-              );
-            });
+            message.author.send(claimInstr + "\n **Claim code:** " + result);
           })
           .catch(err => {
             console.log(err);
